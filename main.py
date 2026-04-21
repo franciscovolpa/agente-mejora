@@ -4,8 +4,29 @@ from sqlmodel import Session
 from db import init_db, get_session
 from models import Event, EventCreate, EventRead
 from services.event_service import create_event, parse_and_update, get_events_by_day
+from pydantic import BaseModel
+from typing import Dict, Any
+import json
 
 app = FastAPI(title="Agente de Mejora")
+
+
+class ParsedUpdate(BaseModel):
+    parsed: Dict[str, Any]
+    parse_status: str
+
+
+@app.patch("/event/{event_id}/parsed")
+def update_parsed(event_id: int, body: ParsedUpdate, session: Session = Depends(get_session)):
+    event = session.get(Event, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
+    event.parsed = json.dumps(body.parsed)
+    event.parse_status = body.parse_status
+    session.add(event)
+    session.commit()
+    session.refresh(event)
+    return event
 
 
 @app.on_event("startup")

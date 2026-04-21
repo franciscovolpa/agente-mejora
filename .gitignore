@@ -6,3 +6,10 @@ __pycache__/
 .idea/
 .vscode/
 .DS_Store
+.env
+DataTest/
+data/
+data/raw/telegram_photos/
+*.jpg
+*.jpeg
+*.png
